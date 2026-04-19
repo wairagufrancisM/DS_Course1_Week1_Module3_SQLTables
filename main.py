@@ -29,7 +29,7 @@
 # 
 # Major Hint: Look for the shared columns across tables you need to 'join' together.
 
-# In[2]:
+# In[114]:
 
 
 # CodeGrade step0
@@ -51,13 +51,13 @@ pd.read_sql("""SELECT * FROM sqlite_master""", conn)
 # 
 # The company would like to let Boston employees go remote but need to know more information about who is working in that office. Return the first and last names and the job titles for all employees in Boston.
 
-# In[11]:
+# In[141]:
 
 
 # CodeGrade step1
 # Replace None with your code
 df_boston = pd.read_sql("""
-                        SELECT firstName, lastName, jobTitle
+                        SELECT firstName, lastName as name
                         FROM employees
                         WHERE officeCode = '2';""", conn)
 
@@ -66,7 +66,7 @@ df_boston = pd.read_sql("""
 # 
 # Recent downsizing and employee attrition have caused some mixups in office tracking and the company is worried they are supporting a 'ghost' location. Are there any offices that have zero employees?
 
-# In[34]:
+# In[140]:
 
 
 # CodeGrade step2
@@ -76,7 +76,8 @@ df_zero_emp = pd.read_sql("""
                           FROM employees e
                           LEFT JOIN offices o
                             ON e.officeCode = o.officeCode
-                          GROUP BY e.officeCode;""", conn)
+                          GROUP BY e.officeCode
+                          HAVING emp_count IS NULL;""", conn)
 
 
 # ## Part 2: Type of Join
@@ -85,7 +86,7 @@ df_zero_emp = pd.read_sql("""
 # 
 # As a part of this larger analysis project the HR department is taking the time to audit employee records to make sure nothing is out of place and have asked you to produce a report of all employees. Return the employees first name and last name along with the city and state of the office that they work out of (if they have one). Include all employees and order them by their first name, then their last name.
 
-# In[38]:
+# In[144]:
 
 
 # CodeGrade step3
@@ -103,7 +104,7 @@ df_employee = pd.read_sql("""
 # 
 # There are several approaches you could take here, including a left join and filtering on null values or using a subquery to filter out customers who do have orders. In total there are 24 customers who have not placed an order.
 
-# In[49]:
+# In[152]:
 
 
 # CodeGrade step4
@@ -113,7 +114,8 @@ df_contacts = pd.read_sql("""
                           FROM customers c
                           WHERE customerNumber NOT IN(
                                 SELECT customerNumber
-                                FROM orders);""", conn)
+                                FROM orders)
+                          ORDER BY contactLastName;""", conn)
 
 
 # ## Part 3: Built-in Function
@@ -124,7 +126,7 @@ df_contacts = pd.read_sql("""
 # 
 # Hint: A member of their team mentioned that they are not sure the 'amount' column is being stored as the right datatype so keep this in mind when sorting.
 
-# In[55]:
+# In[119]:
 
 
 # CodeGrade step5
@@ -143,7 +145,7 @@ df_payment = pd.read_sql("""
 # 
 # The sales rep team has noticed several key team members that stand out as having trustworthy business relations with their customers, reflected by high credit limits indicating more potential for orders. The team wants you to identify these 4 individuals. Return the employee number, first name, last name, and number of customers for employees whose customers have an average credit limit over 90k. Sort by number of customers from high to low.
 
-# In[76]:
+# In[120]:
 
 
 # CodeGrade step6
@@ -165,7 +167,7 @@ df_credit
 # 
 # The product team is looking to create new model kits and wants to know which current products are selling the most in order to get an idea of what is popular. Return the product name and count the number of orders for each product as a column named 'numorders'. Also return a new column, 'totalunits', that sums up the total quantity of product sold (use the quantityOrdered column). Sort the results by the totalunits column, highest to lowest, to showcase the top selling products.
 
-# In[87]:
+# In[121]:
 
 
 # CodeGrade step7
@@ -189,7 +191,7 @@ df_product_sold = pd.read_sql("""
 # 
 # Hint: You might need to join more than 2 tables. Use DISTINCT to return unique/different values.
 
-# In[92]:
+# In[122]:
 
 
 # CodeGrade step8
@@ -209,7 +211,7 @@ df_total_customers = pd.read_sql("""SELECT p.productName, p.productCode, COUNT(D
 # 
 # The custom relations team is worried they are not staffing locations properly to account for customer volume. They want to know how many customers there are per office. Return the count as a column named 'n_customers'. Also return the office code and city.
 
-# In[102]:
+# In[123]:
 
 
 # CodeGrade step9
@@ -231,13 +233,7 @@ df_customers = pd.read_sql("""SELECT o.officeCode, o.city, COUNT(c.customerNumbe
 # 
 # Hint: Start with the subquery, find all the products that have been ordered by 19 or less customers, consider adapting one of your previous queries.
 
-# In[109]:
-
-
-pd.read_sql("SELECT * FROM orders LIMIT 5;", conn)
-
-
-# In[111]:
+# In[160]:
 
 
 # CodeGrade step10
@@ -263,9 +259,9 @@ df_under_20 = pd.read_sql("""WITH underperforming AS (
                           JOIN orderDetails od ON
                             od.orderNumber = o.ordernumber
                           WHERE od.productCode IN (
-                                SELECT productCode FROM underperforming);
+                                SELECT productCode FROM underperforming)
+                          ORDER BY e.lastName;
                           """, conn)
-df_under_20
 
 
 # ### Close the connection
